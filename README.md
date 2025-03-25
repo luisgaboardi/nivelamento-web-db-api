@@ -24,7 +24,7 @@ Cada módulo será desenvolvido separadamente para garantir manutenibilidade e e
 
 ### 📄 Processamento de PDF e Transformação de Dados
 - **Bibliotecas:**
-  - `PyMuPDF` (fitz) - Para extração de texto dos PDFs.
+  - `pdfplumber` - Para extração de texto dos PDFs.
   - `pandas` - Para manipulação e estruturação dos dados.
   - `csv` - Para exportação dos dados em formato estruturado.
   - `zipfile` - Para compactação dos arquivos.

@@ -84,7 +84,6 @@ def create_tables():
         if conn:
             conn.close()
 
-
 def prepare_csv_files():
     """
     Prepara os arquivos CSV para importação no banco de dados PostgreSQL.
@@ -225,6 +224,137 @@ def check_inserted_data(table_name):
             conn.close()
 
 
+def top_10_operadoras_trimestre():
+    """
+    Conecta ao banco de dados PostgreSQL e retorna as 10 operadoras com maiores despesas em 
+    "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último trimestre.
+    """
+    cursor = None
+    conn = None
+    try:
+        # Conecta ao banco de dados
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Query para retornar as 10 operadoras com maiores despesas
+        top_10_query = """
+        SELECT 
+            o.razao_social AS operadora,
+            o.cnpj,
+            o.uf,
+            d.reg_ans,
+            SUM(d.vl_saldo_final) AS total_despesas
+        FROM 
+            demonstracoes_contabeis d
+        JOIN 
+            operadoras o
+        ON 
+            d.reg_ans = o.registro_ans
+        WHERE 
+            d.descricao = 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR '
+            AND d.data >= (date_trunc('quarter', CURRENT_DATE) - INTERVAL '3 months')
+            AND d.data < date_trunc('quarter', CURRENT_DATE)
+        GROUP BY 
+            o.razao_social, o.cnpj, o.uf, d.reg_ans
+        ORDER BY 
+            total_despesas DESC
+        LIMIT 10;
+        """
+
+        print("\nConsultando: Top 10 Operadoras com maiores despesas em 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR' no último trimestre:")
+
+        # Executa a query
+        cursor.execute(top_10_query)
+        results = cursor.fetchall()
+
+        # Define os cabeçalhos da tabela
+        headers = ["Operadora", "CNPJ", "UF", "Registro ANS", "Total Despesas"]
+
+        # Exibe os resultados em formato de tabela
+        print(tabulate(results, headers=headers, tablefmt="grid"))
+
+    except Exception as e:
+        print(f"Erro ao realizar consulta: {e}")
+    finally:
+        # Fecha a conexão com o banco de dados
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def top_10_operadoras_ano():
+    """
+    Conecta ao banco de dados PostgreSQL e retorna as 10 operadoras com maiores despesas em 
+    "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último ano.
+    """
+    cursor = None
+    conn = None
+    try:
+        # Conecta ao banco de dados
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Query para retornar as 10 operadoras com maiores despesas
+        top_10_query = """
+        SELECT 
+            o.razao_social AS operadora,
+            o.cnpj,
+            o.uf,
+            d.reg_ans,
+            SUM(d.vl_saldo_final) AS total_despesas
+        FROM 
+            demonstracoes_contabeis d
+        JOIN 
+            operadoras o
+        ON 
+            d.reg_ans = o.registro_ans
+        WHERE 
+            d.descricao = 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR '
+            AND d.data >= '2024-01-01'
+            AND d.data <= '2024-12-31'
+        GROUP BY 
+            o.razao_social, o.cnpj, o.uf, d.reg_ans
+        ORDER BY 
+            total_despesas DESC
+        LIMIT 10;
+        """
+
+        print("\nConsultando: Top 10 Operadoras com maiores despesas em na categoria no último ANO:")
+
+        # Executa a query
+        cursor.execute(top_10_query)
+        results = cursor.fetchall()
+
+        # Define os cabeçalhos da tabela
+        headers = ["Operadora", "CNPJ", "UF", "Registro ANS", "Total Despesas"]
+
+        # Exibe os resultados em formato de tabela
+        print(tabulate(results, headers=headers, tablefmt="grid"))
+
+    except Exception as e:
+        print(f"Erro ao realizar consulta: {e}")
+    finally:
+        # Fecha a conexão com o banco de dados
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     
@@ -238,3 +368,7 @@ if __name__ == "__main__":
     
     check_inserted_data("demonstracoes_contabeis")
     check_inserted_data("operadoras")
+
+    top_10_operadoras_trimestre()
+
+    top_10_operadoras_ano()

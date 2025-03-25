@@ -1,5 +1,6 @@
 import os
 import csv
+import pandas as pd
 import pdfplumber
 
 
@@ -43,12 +44,39 @@ def extract_table_from_pdf(pdf_path, output_csv):
     
     print(f"\nTabela extraída com sucesso para:\n{output_csv}")
 
+def replace_abbreviations(csv_path, output_csv):
+    """
+    Substitui abreviações nas colunas OD e AMB pelas descrições completas.
+    
+    :param csv_path: Caminho do CSV de entrada.
+    :param output_csv: Caminho do CSV de saída com as abreviações substituídas.
+    """
+    # Legenda para substituição
+    legend = {
+        "OD": "Odontologia",
+        "AMB": "Ambulatorial"
+    }
+
+    # Lê o CSV em um DataFrame
+    df = pd.read_csv(csv_path, header=None)
+
+    # Substitui as abreviações
+    df.replace(legend, inplace=True)
+
+    # Salva o CSV atualizado
+    df.to_csv(output_csv, index=False, header=False, encoding="utf-8")
+    print(f"\nAbreviações substituídas com sucesso e CSV atualizado em:\n{output_csv}")
+
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
 
     # Caminhos dos arquivos
     pdf_path = "downloads/Anexo_1.pdf"  # PDF do Anexo I
     raw_csv = "data_processing/rol_procedimentos_raw.csv"
+    processed_csv = "data_processing/rol_procedimentos.csv"
 
     # 2.1 e 2.2 Extrai a tabela do PDF e salva em CSV
     extract_table_from_pdf(pdf_path, raw_csv)
+
+    # 2.4. Substitui abreviações nas colunas OD e AMB
+    replace_abbreviations(raw_csv, processed_csv)

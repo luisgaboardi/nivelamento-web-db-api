@@ -111,7 +111,130 @@ def prepare_csv_files():
         df.to_csv(csv_path, index=False, sep=";", encoding="utf-8")
 
 
+def import_csv_with_copy(csv_files):
+    """
+    Importa múltiplos arquivos CSV para uma tabela no banco de dados PostgreSQL usando o comando COPY.
+
+    :param csv_files: Lista de caminhos dos arquivos CSV.
+    """
+    print('\n-----------------------------\n')
+    try:
+        # Conecta ao banco de dados
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        for csv_file in csv_files:
+            csv_path = os.path.join("downloads/DemCon", csv_file)
+            print(f"\nImportando arquivo: {csv_file}")
+            if 'OPSA' in csv_file:
+                table_name = "operadoras"
+                columns = """
+                    registro_ans,
+                    cnpj,
+                    razao_social,
+                    nome_fantasia,
+                    modalidade,
+                    logradouro,
+                    numero,
+                    complemento,
+                    bairro,
+                    cidade,
+                    uf,
+                    cep,
+                    ddd,
+                    telefone,
+                    fax,
+                    endereco_eletronico,
+                    representante,
+                    cargo_representante,
+                    regiao_comercializacao,
+                    data_registro_ans
+                """
+            else:
+                table_name = "demonstracoes_contabeis"
+                columns = """
+                    data,
+                    reg_ans,
+                    cd_conta_contabil,
+                    descricao,
+                    vl_saldo_inicial,
+                    vl_saldo_final
+                """
+
+            # Usa o comando COPY para importar os dados
+            with open(csv_path, 'r', encoding='utf-8') as file:
+                cursor.copy_expert(f"""
+                    COPY {table_name} ({columns}) 
+                    FROM STDIN
+                    DELIMITER ';'
+                    CSV HEADER;
+                """, file)
+
+        # Confirma as alterações
+        conn.commit()
+        print(f"\nTodos os arquivos foram importados com sucesso!")
+
+    except Exception as e:
+        print(f"Erro ao importar arquivos CSV: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def check_inserted_data(table_name):
+    """
+    Conecta ao banco de dados PostgreSQL e verifica a quantidade de tuplas na tabela especificada.
+
+    :param table_name: Nome da tabela no banco de dados.
+    """
+    cursor = None
+    conn = None
+    try:
+        # Conecta ao banco de dados
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Query para contar a quantidade de tuplas na tabela
+        count_data = f"SELECT COUNT(*) FROM {table_name};"
+
+        # Executa a query
+        cursor.execute(count_data)
+        count = cursor.fetchone()[0]
+        print(f"\nA tabela '{table_name}' contém {count} tuplas.")
+
+    except Exception as e:
+        print(f"\nErro ao verificar os dados: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     
     create_tables()
+
+    prepare_csv_files()
+
+    csv_files = [f for f in os.listdir("downloads/DemCon") if f.endswith(".csv")]
+
+    import_csv_with_copy(csv_files)
+    
+    check_inserted_data("demonstracoes_contabeis")
+    check_inserted_data("operadoras")

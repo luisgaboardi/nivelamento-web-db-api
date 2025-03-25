@@ -13,6 +13,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+*.csv
+*.zip
 eggs/
 .eggs/
 lib/

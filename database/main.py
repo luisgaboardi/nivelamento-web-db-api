@@ -85,6 +85,32 @@ def create_tables():
             conn.close()
 
 
+def prepare_csv_files():
+    """
+    Prepara os arquivos CSV para importação no banco de dados PostgreSQL.
+    """
+    csv_files = [f for f in os.listdir("downloads/DemCon") if f.endswith(".csv")]
+    for csv_file in csv_files:
+        csv_path = os.path.join("downloads/DemCon", csv_file)
+        df = pd.read_csv(csv_path, delimiter=";", encoding="utf-8")
+        print('\nPreparando arquivo:', csv_file)
+        
+        if "VL_SALDO_INICIAL" in df.columns or "VL_SALDO_FINAL" in df.columns:
+            df.fillna({"VL_SALDO_INICIAL": 0, "VL_SALDO_FINAL": 0}, inplace=True)
+            df["VL_SALDO_INICIAL"] = df["VL_SALDO_INICIAL"].astype(str).str.replace(",", ".").astype(float)
+            df["VL_SALDO_FINAL"] = df["VL_SALDO_FINAL"].astype(str).str.replace(",", ".").astype(float)
+
+        if ('DDD' in df.columns):
+            # Pegar somente os dois primeiros números do DDD e se NaN, transofmrar para 0
+            df['DDD'] = df['DDD'].apply(lambda x: str(x).replace('.', '')[:2] if str(x) != 'nan' else '0')
+
+        # Substitui os telefones com mais de 15 caracteres por 000000000
+        if "Telefone" in df.columns:
+            df["Telefone"] = df["Telefone"].apply(lambda x: x if len(str(x)) <= 15 else "000000000")
+
+        df.to_csv(csv_path, index=False, sep=";", encoding="utf-8")
+
+
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     

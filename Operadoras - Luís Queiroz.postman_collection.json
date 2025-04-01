@@ -1,0 +1,39 @@
+{
+	"info": {
+		"_postman_id": "044a186a-ce23-43b9-b60a-5abc1247047c",
+		"name": "Operadoras - Luís Queiroz",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19464763"
+	},
+	"item": [
+		{
+			"name": "Buscar operadoras",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/operadoras/busca?termo=Saúde",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"operadoras",
+						"busca"
+					],
+					"query": [
+						{
+							"key": "termo",
+							"value": "Saúde"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -34,6 +34,7 @@ Cada módulo será desenvolvido separadamente para garantir manutenibilidade e e
 - **Bibliotecas:**
   - `psycopg2` - Para conexão com PostgreSQL.
   - `SQLAlchemy` - ORM para manipulação de dados.
+  - `Docker Compose` - Para instanciar um banco de dados.
 
 ### 🌐 API e Interface Web
 - **Backend:**
@@ -52,8 +53,8 @@ Cada módulo será desenvolvido separadamente para garantir manutenibilidade e e
 │── 📂 database              # Scripts SQL e manipulação do banco
 │── 📂 api                   # API em FastAPI
 │── 📂 frontend              # Interface web em Vue.js
-│── 📂 tests                 # Testes unitários e de integração
 │── README.md                # Documentação do projeto
+│── requirements.txt         # Dependências do Python
 ```
 
 ## 🚀 Como Executar o Projeto
@@ -82,25 +83,25 @@ pip install -r requirements.txt
   ```
 - **Configuração do Banco de Dados:**
   ```sh
-  python database/setup.py
+  docker compose -f database/docker-compose.yml up -d
+  python database/download.py
+  python database/main.py
   ```
 - **Execução da API:**
   ```sh
   uvicorn api.main:app --reload
   ```
-- **Execução do Frontend:**
+- **Execução do Frontend (em outro terminal):**
   ```sh
   cd frontend
   npm install
   npm run dev
   ```
 
-## 🧪 Testes
-Para rodar os testes:
-```sh
-pytest tests/
-```
-
+- **Ao fim, derrubar container:**
+  ```sh
+  docker compose -f database/docker-compose.yml down
+  ```
 ---
 
 Caso tenha dúvidas ou sugestões, entre em contato! 🚀

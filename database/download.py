@@ -92,11 +92,13 @@ def download_csv(csv_url, output_path="downloads/DemCon/OPSA.csv"):
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         raise ValueError(f"Falha ao baixar o arquivo CSV: {output_path}")
 
-    print(f"Arquivo CSV baixado com sucesso em: {output_path}")
+    print(f"\nArquivo CSV baixado com sucesso em: {output_path}")
     return output_path
 
 if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
+
+    print('Baixando arquivos para popular o banco de dados...\n')
 
     downloaded_files = download_zips()
     for zip_file in downloaded_files:

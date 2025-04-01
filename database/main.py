@@ -224,6 +224,20 @@ def check_inserted_data(table_name):
             conn.close()
 
 
+def save_to_csv(data, headers, filename):
+    """
+    Salva os resultados da consulta em um arquivo CSV.
+
+    :param data: Dados da consulta (lista de tuplas).
+    :param headers: Cabeçalhos das colunas.
+    :param filename: Nome do arquivo CSV.
+    """
+    df = pd.DataFrame(data, columns=headers)
+    output_path = os.path.join("database/outputs", filename)
+    os.makedirs("database/outputs", exist_ok=True)  # Garante que o diretório 'outputs' exista
+    df.to_csv(output_path, index=False, encoding="utf-8")
+    print(f"Resultados salvos em: {output_path}")
+
 def top_10_operadoras_trimestre():
     """
     Conecta ao banco de dados PostgreSQL e retorna as 10 operadoras com maiores despesas em 
@@ -267,17 +281,17 @@ def top_10_operadoras_trimestre():
         LIMIT 10;
         """
 
-        print("\nConsultando: Top 10 Operadoras com maiores despesas em 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR' no último trimestre:")
+        print("\nConsultando: Top 10 Operadoras com maiores despesas no último trimestre:")
 
         # Executa a query
         cursor.execute(top_10_query)
         results = cursor.fetchall()
 
         # Define os cabeçalhos da tabela
-        headers = ["Operadora", "CNPJ", "UF", "Registro ANS", "Total Despesas"]
+        headers = ["Operadora", "CNPJ", "UF", "Registro_ANS", "Total_Despesas"]
 
-        # Exibe os resultados em formato de tabela
-        print(tabulate(results, headers=headers, tablefmt="grid"))
+        # Salva os resultados em um arquivo CSV
+        save_to_csv(results, headers, "top_10_operadoras_trimestre.csv")
 
     except Exception as e:
         print(f"Erro ao realizar consulta: {e}")
@@ -287,7 +301,6 @@ def top_10_operadoras_trimestre():
             cursor.close()
         if conn:
             conn.close()
-
 
 def top_10_operadoras_ano():
     """
@@ -332,7 +345,7 @@ def top_10_operadoras_ano():
         LIMIT 10;
         """
 
-        print("\nConsultando: Top 10 Operadoras com maiores despesas em na categoria no último ANO:")
+        print("\nConsultando: Top 10 Operadoras com maiores despesas no último ano:")
 
         # Executa a query
         cursor.execute(top_10_query)
@@ -341,8 +354,8 @@ def top_10_operadoras_ano():
         # Define os cabeçalhos da tabela
         headers = ["Operadora", "CNPJ", "UF", "Registro ANS", "Total Despesas"]
 
-        # Exibe os resultados em formato de tabela
-        print(tabulate(results, headers=headers, tablefmt="grid"))
+        # Salva os resultados em um arquivo CSV
+        save_to_csv(results, headers, "top_10_operadoras_ano.csv")
 
     except Exception as e:
         print(f"Erro ao realizar consulta: {e}")
